@@ -1,6 +1,4 @@
-﻿// See https://aka.ms/new-console-template for more information
-//Console.WriteLine("Hello, World!");
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace SharpWrapper
 {
@@ -9,13 +7,17 @@ namespace SharpWrapper
         public static void Main(string[] args)
         {
             //Console.WriteLine("你好");
-            Audio2WAV.libmain(args[0]);
+            Audio2WAV.init(args[0]);
+            Audio2WAV.decode_wav();
         }
     }
 
     partial class Audio2WAV
     {
         [LibraryImport("LibAudio2WAV.dll", StringMarshalling = StringMarshalling.Utf8)]
-        public static partial void libmain(string filepath);
+        public static partial void init(string filepath);
+
+        [LibraryImport("LibAudio2WAV.dll", StringMarshalling = StringMarshalling.Utf8)]
+        public static partial void decode_wav();
     }
 }
