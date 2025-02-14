@@ -21,12 +21,18 @@
     <ClCompile Include="wav_output.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="muxer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ffmpeg.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="wav.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="muxer.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

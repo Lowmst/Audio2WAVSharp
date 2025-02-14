@@ -69,6 +69,13 @@ extern "C"
 		}
 		wav.write_head();
 	}
+
+	//__declspec(dllexport) char* 
+}
+
+int main()
+{
+
 }
 
 //int main()
