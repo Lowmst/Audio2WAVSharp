@@ -8,6 +8,19 @@
 #include "wav.h"
 #include <windows.h>
 
+typedef struct
+{
+	int sample_rate;
+	int bits_per_sample;
+}audio_info;
+
+typedef struct
+{
+	int buffer_size;
+	char* data;
+}pcm;
+
+
 AVFormatContext* format_context = avformat_alloc_context();
 
 AVPacket* packet = av_packet_alloc();
@@ -21,10 +34,15 @@ int audio_stream_index;
 int bits_per_sample;
 std::filesystem::path filename;
 
+
+
+
 extern "C"
 {
-	__declspec(dllexport) void init(char* filepath)
+	__declspec(dllexport) audio_info init(char* filepath)
 	{
+		audio_info info;
+
 		avformat_open_input(&format_context, filepath, NULL, NULL);
 		avformat_find_stream_info(format_context, NULL);
 
@@ -48,13 +66,16 @@ extern "C"
 		filename += std::filesystem::path(".wav");
 
 		bits_per_sample = codec_parameters->bits_per_raw_sample ? codec_parameters->bits_per_raw_sample : codec_parameters->bits_per_coded_sample;
-		std::println("{}", bits_per_sample);
+
+		info.sample_rate = codec_parameters->sample_rate;
+		info.bits_per_sample = bits_per_sample;
+
+		return info;
 	}
 
 	__declspec(dllexport) void decode_wav()
 	{
 		wav_output wav(filename, codec_parameters->sample_rate, bits_per_sample);
-		std::println("{}", audio_stream_index);
 		while (av_read_frame(format_context, packet) == 0) // 循环读数据包
 		{
 			if (packet->stream_index == audio_stream_index)
@@ -64,13 +85,16 @@ extern "C"
 				while (avcodec_receive_frame(codec_context, frame) == 0) // 发送单个数据包后循环取解码后数据
 				{
 					wav.write_data(frame->data, frame->format, frame->nb_samples);
+					av_frame_unref(frame);
 				}
+				av_packet_unref(packet);
 			}
 		}
 		wav.write_head();
 	}
 
 	//__declspec(dllexport) char* 
+
 }
 
 int main()

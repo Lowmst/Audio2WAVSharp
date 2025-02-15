@@ -1,11 +1,11 @@
 #pragma once
 #include "ffmpeg.h"
 
-class muxer
+class Muxer
 {
 public:
-	muxer(int sample_rate, int bit_per_sample);
-	char* frame_to_pcm(AVFrame* frame);
+	Muxer(int sample_rate, int bit_per_sample);
+	void frame_to_pcm(AVFrame* frame);
 private:
 	int sample_rate;
 	int bits_per_sample;
@@ -13,9 +13,13 @@ private:
 
 	int nb_samples_total = 0;
 
-	template <typename T>
-	char* planar(uint8_t** data, int format, int nb_samples);
+	char* pcm_buffer;
 
 	template <typename T>
-	char* packed(uint8_t** data, int format, int nb_samples);
+	void planar(uint8_t** data, int format, int nb_samples);
+
+	template <typename T>
+	void packed(uint8_t** data, int format, int nb_samples);
+
+	void pcm_buffer_free();
 };
