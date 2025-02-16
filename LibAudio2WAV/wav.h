@@ -1,5 +1,5 @@
 #pragma once
-#include <fstream>
+import std;
 #include "ffmpeg.h"
 
 typedef struct WAV_HEAD

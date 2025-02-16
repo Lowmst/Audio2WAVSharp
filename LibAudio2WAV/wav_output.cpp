@@ -1,5 +1,4 @@
-#include <fstream>
-#include <filesystem>
+import std;
 #include "ffmpeg.h"
 #include "wav.h"
 

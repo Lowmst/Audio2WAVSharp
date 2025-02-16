@@ -1,8 +1,4 @@
-//#include <chrono>
-#include <filesystem>
-//#include <iostream>
-#include <print>
-//#include <vector>
+import std;
 
 #include "ffmpeg.h"
 #include "wav.h"
@@ -43,8 +39,8 @@ extern "C"
 	{
 		audio_info info;
 
-		avformat_open_input(&format_context, filepath, NULL, NULL);
-		avformat_find_stream_info(format_context, NULL);
+		avformat_open_input(&format_context, filepath, nullptr, nullptr);
+		avformat_find_stream_info(format_context, nullptr);
 
 		for (unsigned int i = 0; i < format_context->nb_streams; i++)
 		{
@@ -60,7 +56,7 @@ extern "C"
 		codec_context = avcodec_alloc_context3(codec);
 
 		avcodec_parameters_to_context(codec_context, codec_parameters);
-		avcodec_open2(codec_context, codec, NULL);
+		avcodec_open2(codec_context, codec, nullptr);
 
 		filename = std::filesystem::path(reinterpret_cast<char8_t*>(filepath)).filename().stem();
 		filename += std::filesystem::path(".wav");
@@ -115,7 +111,8 @@ extern "C"
 			}
 			else
 			{
-				return pcm{ 0,NULL };
+				return pcm{ 0, nullptr };
+				
 			}
 		}
 	}
@@ -141,9 +138,9 @@ int main()
 //	int argc;
 //	wchar_t** argv = CommandLineToArgvW(GetCommandLineW(), &argc);
 //	wchar_t* file = argv[1];
-//	int utf8_size = WideCharToMultiByte(CP_UTF8, 0, file, -1, NULL, 0, NULL, NULL);
+//	int utf8_size = WideCharToMultiByte(CP_UTF8, 0, file, -1, nullptr, 0, nullptr, nullptr);
 //	char* filep = (char*)malloc(utf8_size);
-//	WideCharToMultiByte(CP_UTF8, 0, file, -1, filep, utf8_size, NULL, NULL);
+//	WideCharToMultiByte(CP_UTF8, 0, file, -1, filep, utf8_size, nullptr, nullptr);
 //
 //	init(filep);
 //	decode_wav();
@@ -154,8 +151,8 @@ int main()
 //
 //void init(char8_t* filename)
 //{
-//	avformat_open_input(&fmt_ctx, reinterpret_cast<const char*>(filename), NULL, NULL);
-//	avformat_find_stream_info(fmt_ctx, NULL);
+//	avformat_open_input(&fmt_ctx, reinterpret_cast<const char*>(filename), nullptr, nullptr);
+//	avformat_find_stream_info(fmt_ctx, nullptr);
 //}
 //
 //extern "C"
@@ -181,15 +178,15 @@ int main()
 //		// 打开文件并读取流信息
 //
 //		//wchar_t* filename = argv[1];
-//		//int utf8_size = WideCharToMultiByte(CP_UTF8, 0, filename, -1, NULL, 0, NULL, NULL);
+//		//int utf8_size = WideCharToMultiByte(CP_UTF8, 0, filename, -1, nullptr, 0, nullptr, nullptr);
 //		//char* filepath = (char*)malloc(utf8_size);
-//		//WideCharToMultiByte(CP_UTF8, 0, filename, -1, filepath, utf8_size, NULL, NULL);
+//		//WideCharToMultiByte(CP_UTF8, 0, filename, -1, filepath, utf8_size, nullptr, nullptr);
 //
 //
 //		// 打开文件并读取流信息
 //
-//		avformat_open_input(&fmt_ctx, reinterpret_cast<const char*>(filepath), NULL, NULL);
-//		avformat_find_stream_info(fmt_ctx, NULL);
+//		avformat_open_input(&fmt_ctx, reinterpret_cast<const char*>(filepath), nullptr, nullptr);
+//		avformat_find_stream_info(fmt_ctx, nullptr);
 //
 //		//init(reinterpret_cast<const char*>filepath);
 //
@@ -228,7 +225,7 @@ int main()
 //
 //		// 将解码参数应用于解码器
 //		avcodec_parameters_to_context(avc_ctx, codecpar);
-//		avcodec_open2(avc_ctx, codec, NULL);
+//		avcodec_open2(avc_ctx, codec, nullptr);
 //
 //		// 初始化帧
 //		AVFrame* frame = av_frame_alloc();
@@ -247,9 +244,9 @@ int main()
 //		//std::filesystem::path f(utf8_filename);
 //		//std::println("PCM 写入 {}", f.wstring());
 //		//std::wcout << output_filename << std::endl;
-//		//utf8_size = WideCharToMultiByte(CP_UTF8, 0, output_filename.c_str(), -1, NULL, 0, NULL, NULL);
+//		//utf8_size = WideCharToMultiByte(CP_UTF8, 0, output_filename.c_str(), -1, nullptr, 0, nullptr, nullptr);
 //		//char* utf8_filename = (char*)malloc(utf8_size);
-//		//WideCharToMultiByte(CP_UTF8, 0, filename, -1, utf8_filename, utf8_size, NULL, NULL);
+//		//WideCharToMultiByte(CP_UTF8, 0, filename, -1, utf8_filename, utf8_size, nullptr, nullptr);
 //
 //
 //
@@ -274,7 +271,7 @@ int main()
 //		wav.write_head();
 //
 //		// 最后发一次空包 // 音频流大概率不需要
-//		//int ret_send = avcodec_send_packet(avc_ctx, NULL);
+//		//int ret_send = avcodec_send_packet(avc_ctx, nullptr);
 //		//if (ret_send == 0) {
 //		//	for (;;)
 //		//	{
