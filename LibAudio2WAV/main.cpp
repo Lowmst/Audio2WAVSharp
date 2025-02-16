@@ -6,6 +6,7 @@
 
 #include "ffmpeg.h"
 #include "wav.h"
+#include "muxer.h"
 #include <windows.h>
 
 typedef struct
@@ -20,6 +21,8 @@ typedef struct
 	char* data;
 }pcm;
 
+Muxer* muxer;
+
 
 AVFormatContext* format_context = avformat_alloc_context();
 
@@ -33,9 +36,6 @@ AVCodecContext* codec_context;
 int audio_stream_index;
 int bits_per_sample;
 std::filesystem::path filename;
-
-
-
 
 extern "C"
 {
@@ -65,10 +65,13 @@ extern "C"
 		filename = std::filesystem::path(reinterpret_cast<char8_t*>(filepath)).filename().stem();
 		filename += std::filesystem::path(".wav");
 
-		bits_per_sample = codec_parameters->bits_per_raw_sample ? codec_parameters->bits_per_raw_sample : codec_parameters->bits_per_coded_sample;
+		bits_per_sample = codec_parameters->bits_per_raw_sample ?
+			codec_parameters->bits_per_raw_sample : codec_parameters->bits_per_coded_sample;
 
 		info.sample_rate = codec_parameters->sample_rate;
 		info.bits_per_sample = bits_per_sample;
+
+		muxer = new Muxer(codec_parameters->sample_rate, bits_per_sample);
 
 		return info;
 	}
@@ -93,8 +96,39 @@ extern "C"
 		wav.write_head();
 	}
 
-	//__declspec(dllexport) char* 
+	__declspec(dllexport) pcm get_pcm()
+	{
+		if (avcodec_receive_frame(codec_context, frame) == 0)
+		{
+			muxer->frame_to_pcm(frame);
+			return pcm{ frame->nb_samples, muxer->pcm_buffer };
+		}
+		else
+		{
+			av_packet_unref(packet);
+			if (av_read_frame(format_context, packet) == 0)
+			{
+				avcodec_send_packet(codec_context, packet);
+				avcodec_receive_frame(codec_context, frame);
+				muxer->frame_to_pcm(frame);
+				return pcm{ frame->nb_samples, muxer->pcm_buffer };
+			}
+			else
+			{
+				return pcm{ 0,NULL };
+			}
+		}
+	}
 
+	__declspec(dllexport) int get_pcm_size()
+	{
+		return frame->nb_samples;
+	}
+
+	__declspec(dllexport) void free_buffers()
+	{
+		muxer->pcm_buffer_free();
+	}
 }
 
 int main()

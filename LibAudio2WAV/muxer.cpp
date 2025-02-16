@@ -10,11 +10,11 @@ Muxer::Muxer(int sample_rate, int bits_per_sample)
 
 void Muxer::frame_to_pcm(AVFrame* frame)
 {
-	int format = frame->format;
+	AVSampleFormat format = static_cast<AVSampleFormat>(frame->format);
 	int nb_samples = frame->nb_samples;
 	uint8_t** data = frame->data;
 
-	if (av_sample_fmt_is_planar(AVSampleFormat(format)))
+	if (av_sample_fmt_is_planar(format))
 	{
 		switch (format)
 		{
@@ -54,10 +54,10 @@ void Muxer::frame_to_pcm(AVFrame* frame)
 }
 
 template <typename T>
-void Muxer::planar(uint8_t** data, int format, int nb_samples)
+void Muxer::planar(uint8_t** data, AVSampleFormat format, int nb_samples)
 {
 	this->nb_samples_total += 2 * nb_samples;
-	int bytes_per_data_sample = av_get_bytes_per_sample(AVSampleFormat(format));
+	int bytes_per_data_sample = av_get_bytes_per_sample(format);
 
 	this->pcm_buffer = new char[2 * nb_samples * this->bytes_per_sample];
 
@@ -75,7 +75,6 @@ void Muxer::planar(uint8_t** data, int format, int nb_samples)
 	}
 	else
 	{
-		this->pcm_buffer = new char[2 * nb_samples * this->bytes_per_sample];
 		int shift = (bytes_per_data_sample - this->bytes_per_sample) * 8;
 
 		for (int i = 0; i < 2 * nb_samples; i++)

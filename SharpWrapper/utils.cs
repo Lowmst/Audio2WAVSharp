@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SharpWrapper
 {
-    class utils
+    class Utils
     {
     }
 }
