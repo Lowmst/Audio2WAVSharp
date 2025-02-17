@@ -7,8 +7,22 @@ using System.Threading.Tasks;
 
 namespace SharpWrapper
 {
+    struct PCM
+    {
+        public IntPtr data;
+        public int length;
+    }
+
     partial class Audio2WAV
     {
+        private WavWriter wav;
+
+        public Audio2WAV(string filename)
+        {
+            wav = new WavWriter(filename);
+        }
+
+
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct AudioInfo
         {
@@ -16,8 +30,10 @@ namespace SharpWrapper
             public int bits_per_sample;
         }
 
-        public static void Write(byte[] pcm)
+        public static void Write(PCM pcm)
         {
+            var data = new byte[pcm.length];
+            Marshal.Copy(pcm.data, data, 0, pcm.length);
 
         }
 
