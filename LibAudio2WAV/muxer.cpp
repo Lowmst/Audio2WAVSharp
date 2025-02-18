@@ -1,11 +1,9 @@
 #include "ffmpeg.h"
 #include "muxer.h"
 
-Muxer::Muxer(int sample_rate, int bits_per_sample)
+Muxer::Muxer(int bytes_per_sample)
 {
-	this->sample_rate = sample_rate;
-	this->bits_per_sample = bits_per_sample;
-	this->bytes_per_sample = (int)ceil((float)bits_per_sample / 8);
+	this->bytes_per_sample = bytes_per_sample;
 }
 
 void Muxer::frame_to_pcm(AVFrame* frame)
@@ -56,7 +54,7 @@ void Muxer::frame_to_pcm(AVFrame* frame)
 template <typename T>
 void Muxer::planar(uint8_t** data, AVSampleFormat format, int nb_samples)
 {
-	this->nb_samples_total += 2 * nb_samples;
+
 	int bytes_per_data_sample = av_get_bytes_per_sample(format);
 
 	this->pcm_buffer = new char[2 * nb_samples * this->bytes_per_sample];
@@ -93,10 +91,10 @@ void Muxer::planar(uint8_t** data, AVSampleFormat format, int nb_samples)
 
 
 template <typename T>
-void Muxer::packed(uint8_t** data, int format, int nb_samples)
+void Muxer::packed(uint8_t** data, AVSampleFormat format, int nb_samples)
 {
-	this->nb_samples_total += 2 * nb_samples;
-	int bytes_per_data_sample = av_get_bytes_per_sample(AVSampleFormat(format));
+
+	int bytes_per_data_sample = av_get_bytes_per_sample(format);
 
 	this->pcm_buffer = new char[2 * nb_samples * this->bytes_per_sample];
 

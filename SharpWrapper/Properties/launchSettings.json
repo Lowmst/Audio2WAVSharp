@@ -1,8 +1,7 @@
 {
   "profiles": {
     "SharpWrapper": {
-      "commandName": "Project",
-      "commandLineArgs": "\"D:\\Music\\iTunes\\サツキ\\Circus's Detail (feat. Hatsune Miku, Kasane Teto, 鏡音リン, 鏡音レン, KAFU, Kaai Yuki, Nurse Robtot TypeT, Gekiyaku beta, カゼヒキβ, v4 flower, Xinhua, 小春六花, Natsuki Karin, 花隈千冬, Chis-A & Ci flower)\\10. メズマライザー (feat. 初音ミク & 重音テト).m4a\""
+      "commandName": "Project"
     }
   }
 }

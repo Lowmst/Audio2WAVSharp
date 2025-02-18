@@ -7,40 +7,33 @@ using System.Threading.Tasks;
 
 namespace SharpWrapper
 {
+    [StructLayout(LayoutKind.Sequential, Pack = 8)]
     struct PCM
     {
+        public int buffer_size;
         public IntPtr data;
-        public int length;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    struct AudioInfo
+    {
+        public int sample_rate;
+        public int bits_per_sample;
     }
 
     partial class Audio2WAV
     {
-        private WavWriter wav;
-
-        public Audio2WAV(string filename)
-        {
-            wav = new WavWriter(filename);
-        }
-
-
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        public struct AudioInfo
-        {
-            public int sample_rate;
-            public int bits_per_sample;
-        }
-
-        public static void Write(PCM pcm)
-        {
-            var data = new byte[pcm.length];
-            Marshal.Copy(pcm.data, data, 0, pcm.length);
-
-        }
 
         [LibraryImport("LibAudio2WAV.dll", StringMarshalling = StringMarshalling.Utf8)]
         public static partial AudioInfo init(string filepath);
 
-        [LibraryImport("LibAudio2WAV.dll", StringMarshalling = StringMarshalling.Utf8)]
+        [LibraryImport("LibAudio2WAV.dll")]
         public static partial void decode_wav();
+
+        [LibraryImport("LibAudio2WAV.dll")]
+        public static partial PCM receive();
+
+        [LibraryImport("LibAudio2WAV.dll")]
+        public static partial void free_buffers();
     }
 }

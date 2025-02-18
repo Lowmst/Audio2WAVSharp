@@ -19,7 +19,6 @@ typedef struct
 
 Muxer* muxer;
 
-
 AVFormatContext* format_context = avformat_alloc_context();
 
 AVPacket* packet = av_packet_alloc();
@@ -31,6 +30,7 @@ AVCodecContext* codec_context;
 
 int audio_stream_index;
 int bits_per_sample;
+int bytes_per_sample;
 std::filesystem::path filename;
 
 extern "C"
@@ -67,7 +67,9 @@ extern "C"
 		info.sample_rate = codec_parameters->sample_rate;
 		info.bits_per_sample = bits_per_sample;
 
-		muxer = new Muxer(codec_parameters->sample_rate, bits_per_sample);
+		bytes_per_sample = (int)ceil((float)bits_per_sample / 8);
+
+		muxer = new Muxer(bytes_per_sample);
 
 		return info;
 	}
@@ -92,35 +94,38 @@ extern "C"
 		wav.write_head();
 	}
 
-	__declspec(dllexport) pcm get_pcm()
+	__declspec(dllexport) pcm receive()
 	{
 		if (avcodec_receive_frame(codec_context, frame) == 0)
 		{
+			int buffer_size = 2 * bytes_per_sample * frame->nb_samples;
 			muxer->frame_to_pcm(frame);
-			return pcm{ frame->nb_samples, muxer->pcm_buffer };
+			//std::println("{}", ((int16_t*)muxer->pcm_buffer)[1000]);
+			return pcm{ buffer_size, muxer->pcm_buffer };
 		}
-		else
+
+		av_packet_unref(packet);
+		while (av_read_frame(format_context, packet) == 0)
 		{
-			av_packet_unref(packet);
-			if (av_read_frame(format_context, packet) == 0)
+			if (packet->stream_index == audio_stream_index)
 			{
 				avcodec_send_packet(codec_context, packet);
-				avcodec_receive_frame(codec_context, frame);
-				muxer->frame_to_pcm(frame);
-				return pcm{ frame->nb_samples, muxer->pcm_buffer };
-			}
-			else
-			{
-				return pcm{ 0, nullptr };
-				
+				if (avcodec_receive_frame(codec_context, frame) == 0)
+				{
+					int buffer_size = 2 * bytes_per_sample * frame->nb_samples;
+					muxer->frame_to_pcm(frame);
+					//std::println("{}", ((int16_t*)muxer->pcm_buffer)[100]);
+					return pcm{ buffer_size, muxer->pcm_buffer };
+				}
 			}
 		}
+		return pcm{ 0, nullptr };
 	}
 
-	__declspec(dllexport) int get_pcm_size()
-	{
-		return frame->nb_samples;
-	}
+	//__declspec(dllexport) int get_pcm_size()
+	//{
+	//	return frame->nb_samples;
+	//}
 
 	__declspec(dllexport) void free_buffers()
 	{
@@ -130,7 +135,47 @@ extern "C"
 
 int main()
 {
+	int argc;
+	wchar_t** argv = CommandLineToArgvW(GetCommandLineW(), &argc);
+	wchar_t* file = argv[1];
+	int utf8_size = WideCharToMultiByte(CP_UTF8, 0, file, -1, nullptr, 0, nullptr, nullptr);
+	char* filep = (char*)malloc(utf8_size);
+	WideCharToMultiByte(CP_UTF8, 0, file, -1, filep, utf8_size, nullptr, nullptr);
 
+	init(filep);
+
+	std::ofstream filewav;
+	filewav.open("test.wav", std::ios::binary);
+	filewav.seekp(44);
+
+
+	int size = 0;
+	auto pcm = receive();
+	while (pcm.buffer_size != 0)
+	{
+		size += pcm.buffer_size;
+		filewav.write(pcm.data, pcm.buffer_size);
+		pcm = receive();
+	}
+	filewav.seekp(0);
+	wav_head* head;
+	head = new wav_head{
+		{'R','I','F','F'},
+		36+(unsigned int)size,
+		{'W','A','V','E'},
+		{'f','m','t',' '},
+		16,
+		1,
+		2,
+		(uint32_t)44100,
+		(uint32_t)(2 * 44100 * bits_per_sample / 8),
+		(uint16_t)(2 * bits_per_sample / 8),
+		(uint16_t)bits_per_sample,
+		{'d','a','t','a'},
+		(unsigned int)size
+	};
+	filewav.write((char*)head, 44);
+	filewav.close();
 }
 
 //int main()
