@@ -52,10 +52,15 @@ namespace SharpWrapper
 
         
 
-        public void WritePCM(byte[] pcm, int buffer_size)
+        public void WritePCM(PCMPacket pcm)
         {
-            file.Write(pcm);
-            this.size += buffer_size;
+            this.size += pcm.size;
+            var bytes = new byte[pcm.size];
+
+            Marshal.Copy(pcm.data, bytes, 0, pcm.size);
+            Audio2WAV.free_buffer();
+
+            file.Write(bytes);
         }
 
         public void WriteHead()

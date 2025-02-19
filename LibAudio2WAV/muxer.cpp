@@ -1,16 +1,18 @@
 #include "ffmpeg.h"
 #include "muxer.h"
 
-Muxer::Muxer(int bytes_per_sample)
+Muxer::Muxer(const int bytes_per_sample)
 {
 	this->bytes_per_sample = bytes_per_sample;
 }
 
 void Muxer::frame_to_pcm(AVFrame* frame)
 {
-	AVSampleFormat format = static_cast<AVSampleFormat>(frame->format);
-	int nb_samples = frame->nb_samples;
+	const auto format = static_cast<AVSampleFormat>(frame->format);
+	const int nb_samples = frame->nb_samples;
 	uint8_t** data = frame->data;
+
+	this->pcm_buffer = new char[2ll * nb_samples * this->bytes_per_sample];
 
 	if (av_sample_fmt_is_planar(format))
 	{
@@ -28,6 +30,8 @@ void Muxer::frame_to_pcm(AVFrame* frame)
 		case AV_SAMPLE_FMT_S64P:
 			planar<int64_t>(data, format, nb_samples);
 			break;
+		default:
+			return;
 		}
 	}
 	else
@@ -46,79 +50,55 @@ void Muxer::frame_to_pcm(AVFrame* frame)
 		case AV_SAMPLE_FMT_S64:
 			packed<int64_t>(data, format, nb_samples);
 			break;
+		default:
+			return;
 		}
 	}
 	av_frame_unref(frame);
 }
 
 template <typename T>
-void Muxer::planar(uint8_t** data, AVSampleFormat format, int nb_samples)
+void Muxer::planar(uint8_t** data, const AVSampleFormat format, const int nb_samples) const
 {
-
 	int bytes_per_data_sample = av_get_bytes_per_sample(format);
 
-	this->pcm_buffer = new char[2 * nb_samples * this->bytes_per_sample];
-
-	T* samples = new T[2 * nb_samples];
+	T* samples = new T[2ll * nb_samples];
 	for (int i = 0; i < nb_samples; i++)
 	{
-		samples[2 * i] = ((T*)data[0])[i];
-		samples[2 * i + 1] = ((T*)data[1])[i];
+		samples[2ll * i] = reinterpret_cast<T*>(data[0])[i];
+		samples[2 * i + 1] = reinterpret_cast<T*>(data[1])[i];
 	}
 
-	if (this->bytes_per_sample == bytes_per_data_sample)
-	{
-		//this->file.write((char*)samples, 2 * sizeof(T) * frame_nb_samples);
-		memcpy(this->pcm_buffer, samples, 2 * sizeof(T) * nb_samples);
-	}
-	else
-	{
-		int shift = (bytes_per_data_sample - this->bytes_per_sample) * 8;
-
-		for (int i = 0; i < 2 * nb_samples; i++)
-		{
-			for (int j = 0; j < this->bytes_per_sample; j++)
-			{
-				this->pcm_buffer[this->bytes_per_sample * i + j] = (char)((samples[i] >> (8 * j + shift)) & 0xFF);
-			}
-		}
-
-		//this->file.write(bytes, 2 * frame_nb_samples * this->bytes_per_sample);
-		//delete[] bytes;
-	}
+	packed<T>(reinterpret_cast<uint8_t**>(&samples), format, nb_samples);
 	delete[] samples;
 }
 
-
 template <typename T>
-void Muxer::packed(uint8_t** data, AVSampleFormat format, int nb_samples)
+void Muxer::packed(uint8_t** data, const AVSampleFormat format, const int nb_samples) const
 {
 
 	int bytes_per_data_sample = av_get_bytes_per_sample(format);
 
-	this->pcm_buffer = new char[2 * nb_samples * this->bytes_per_sample];
-
 	if (this->bytes_per_sample == bytes_per_data_sample)
 	{
-		//this->file.write((char*)data[0], 2 * sizeof(T) * frame_nb_samples);
-		memcpy(this->pcm_buffer, data[0], 2 * sizeof(T) * nb_samples);
+		memcpy(this->pcm_buffer, *data, 2 * sizeof(T) * nb_samples);
 	}
 	else
 	{
-		//this->pcm_buffer = new char[2 * frame_nb_samples * this->bytes_per_sample];
-		int shift = (bytes_per_data_sample - this->bytes_per_sample) * 8;
+		const int shift = (bytes_per_data_sample - this->bytes_per_sample) * 8;
 
 		for (int i = 0; i < 2 * nb_samples; i++)
 		{
 			for (int j = 0; j < this->bytes_per_sample; j++)
 			{
-				this->pcm_buffer[this->bytes_per_sample * i + j] = (char)((((T*)data[0])[i] >> (8 * j + shift)) & 0xFF);
+				this->pcm_buffer[this->bytes_per_sample * i + j] =
+					static_cast<char>((reinterpret_cast<T*>(*data)[i] >> (8 * j + shift)) & 0xFF);
 			}
 		}
 	}
 }
 
-void Muxer::pcm_buffer_free()
+void Muxer::pcm_buffer_free() const
 {
 	delete[] this->pcm_buffer;
 }

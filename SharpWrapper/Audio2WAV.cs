@@ -8,14 +8,14 @@ using System.Threading.Tasks;
 namespace SharpWrapper
 {
     [StructLayout(LayoutKind.Sequential, Pack = 8)]
-    struct PCM
+    struct PCMPacket
     {
-        public int buffer_size;
+        public int size;
         public IntPtr data;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    struct AudioInfo
+    struct WAVParameters
     {
         public int sample_rate;
         public int bits_per_sample;
@@ -25,15 +25,12 @@ namespace SharpWrapper
     {
 
         [LibraryImport("LibAudio2WAV.dll", StringMarshalling = StringMarshalling.Utf8)]
-        public static partial AudioInfo init(string filepath);
+        public static partial WAVParameters init(string filepath);
 
         [LibraryImport("LibAudio2WAV.dll")]
-        public static partial void decode_wav();
+        public static partial PCMPacket decode();
 
         [LibraryImport("LibAudio2WAV.dll")]
-        public static partial PCM receive();
-
-        [LibraryImport("LibAudio2WAV.dll")]
-        public static partial void free_buffers();
+        public static partial void free_buffer();
     }
 }

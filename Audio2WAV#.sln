@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpWrapper", "SharpWrappe
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibAudio2WAV", "LibAudio2WAV\LibAudio2WAV.vcxproj", "{94510EDC-7F6B-40E3-ACB0-38900109A99A}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "test\test.vcxproj", "{71C8F4B9-CD18-4017-8B58-8E64499DBE6D}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,18 +41,6 @@ Global
 		{94510EDC-7F6B-40E3-ACB0-38900109A99A}.Release|x64.Build.0 = Release|x64
 		{94510EDC-7F6B-40E3-ACB0-38900109A99A}.Release|x86.ActiveCfg = Release|Win32
 		{94510EDC-7F6B-40E3-ACB0-38900109A99A}.Release|x86.Build.0 = Release|Win32
-		{71C8F4B9-CD18-4017-8B58-8E64499DBE6D}.Debug|Any CPU.ActiveCfg = Debug|x64
-		{71C8F4B9-CD18-4017-8B58-8E64499DBE6D}.Debug|Any CPU.Build.0 = Debug|x64
-		{71C8F4B9-CD18-4017-8B58-8E64499DBE6D}.Debug|x64.ActiveCfg = Debug|x64
-		{71C8F4B9-CD18-4017-8B58-8E64499DBE6D}.Debug|x64.Build.0 = Debug|x64
-		{71C8F4B9-CD18-4017-8B58-8E64499DBE6D}.Debug|x86.ActiveCfg = Debug|Win32
-		{71C8F4B9-CD18-4017-8B58-8E64499DBE6D}.Debug|x86.Build.0 = Debug|Win32
-		{71C8F4B9-CD18-4017-8B58-8E64499DBE6D}.Release|Any CPU.ActiveCfg = Release|x64
-		{71C8F4B9-CD18-4017-8B58-8E64499DBE6D}.Release|Any CPU.Build.0 = Release|x64
-		{71C8F4B9-CD18-4017-8B58-8E64499DBE6D}.Release|x64.ActiveCfg = Release|x64
-		{71C8F4B9-CD18-4017-8B58-8E64499DBE6D}.Release|x64.Build.0 = Release|x64
-		{71C8F4B9-CD18-4017-8B58-8E64499DBE6D}.Release|x86.ActiveCfg = Release|Win32
-		{71C8F4B9-CD18-4017-8B58-8E64499DBE6D}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

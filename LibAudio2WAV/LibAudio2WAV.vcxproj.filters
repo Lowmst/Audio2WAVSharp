@@ -15,10 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="wav_output.cpp">
+    <ClCompile Include="dllexport.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="muxer.cpp">
@@ -29,10 +26,10 @@
     <ClInclude Include="ffmpeg.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="wav.h">
+    <ClInclude Include="muxer.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="muxer.h">
+    <ClInclude Include="dllexport.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
