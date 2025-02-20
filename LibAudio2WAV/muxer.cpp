@@ -1,3 +1,4 @@
+import std;
 #include "ffmpeg.h"
 #include "muxer.h"
 
@@ -85,15 +86,10 @@ void Muxer::packed(uint8_t** data, const AVSampleFormat format, const int nb_sam
 	}
 	else
 	{
-		const int shift = (bytes_per_data_sample - this->bytes_per_sample) * 8;
-
-		for (int i = 0; i < 2 * nb_samples; i++)
+		const int shift = bytes_per_data_sample - this->bytes_per_sample;
+		for (int i = 0; i < 2 * nb_samples * this->bytes_per_sample; i++)
 		{
-			for (int j = 0; j < this->bytes_per_sample; j++)
-			{
-				this->pcm_buffer[this->bytes_per_sample * i + j] =
-					static_cast<char>((reinterpret_cast<T*>(*data)[i] >> (8 * j + shift)) & 0xFF);
-			}
+			this->pcm_buffer[i] = reinterpret_cast<char*>(*data)[i / this->bytes_per_sample + shift + i];
 		}
 	}
 }
