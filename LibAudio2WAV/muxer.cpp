@@ -61,8 +61,6 @@ void Muxer::frame_to_pcm(AVFrame* frame)
 template <typename T>
 void Muxer::planar(uint8_t** data, const AVSampleFormat format, const int nb_samples) const
 {
-	int bytes_per_data_sample = av_get_bytes_per_sample(format);
-
 	T* samples = new T[2ll * nb_samples];
 	for (int i = 0; i < nb_samples; i++)
 	{
@@ -77,16 +75,12 @@ void Muxer::planar(uint8_t** data, const AVSampleFormat format, const int nb_sam
 template <typename T>
 void Muxer::packed(uint8_t** data, const AVSampleFormat format, const int nb_samples) const
 {
-
-	int bytes_per_data_sample = av_get_bytes_per_sample(format);
-
-	if (this->bytes_per_sample == bytes_per_data_sample)
+	if (const int shift = av_get_bytes_per_sample(format) - this->bytes_per_sample; shift == 0)
 	{
 		memcpy(this->pcm_buffer, *data, 2 * sizeof(T) * nb_samples);
 	}
 	else
 	{
-		const int shift = bytes_per_data_sample - this->bytes_per_sample;
 		for (int i = 0; i < 2 * nb_samples * this->bytes_per_sample; i++)
 		{
 			this->pcm_buffer[i] = reinterpret_cast<char*>(*data)[i / this->bytes_per_sample + shift + i];
